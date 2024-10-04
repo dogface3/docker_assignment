@@ -30,7 +30,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Calculator</mainClass> <!-- Correct main class -->
+                            <mainClass>SportsActivity</mainClass> <!-- Correct main class -->
                         </manifest>
                     </archive>
                 </configuration>
