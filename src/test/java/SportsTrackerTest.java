@@ -1,31 +1,74 @@
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.Assert.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.List;
+
 public class SportsTrackerTest {
 
-    public static void main(String[] args) {
-        SportsTracker tracker = new SportsTracker();
+    private SportsTracker tracker;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
 
-        // Test 1: Log a few activities
-        System.out.println("Test 1: Log activities");
+    @BeforeEach
+    public void setUp() {
+        tracker = new SportsTracker();  // Initialize a new SportsTracker before each test
+        System.setOut(new PrintStream(outContent));  // Redirect System.out for testing
+    }
+
+    @Test
+    public void testLogActivity() {
+        tracker.logActivity("Running", 30, "Monday");
+
+        List<SportsTracker.SportsActivity> activities = tracker.getActivities();
+        assertEquals(1, activities.size());  // Check that one activity was added
+        assertEquals("Running", activities.get(0).name);  // Check the activity name
+        assertEquals(30, activities.get(0).duration);  // Check the duration
+        assertEquals("Monday", activities.get(0).day);  // Check the day
+    }
+
+    @Test
+    public void testViewActivities() {
         tracker.logActivity("Running", 30, "Monday");
         tracker.logActivity("Swimming", 45, "Wednesday");
-        tracker.logActivity("Cycling", 60, "Friday");
-        tracker.logActivity("Yoga", 40, "Saturday");
 
-        // Test 2: View all logged activities
-        System.out.println("\nTest 2: View activities");
-        tracker.viewActivities();  // This should print all the logged activities
+        tracker.viewActivities();
 
-        // Test 3: Calculate total time spent on sports for the week
-        System.out.println("\nTest 3: Calculate total time");
-        tracker.calculateTotalTime();  // This should calculate and display total time
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("Running, Duration: 30 minutes, Day: Monday"));
+        assertTrue(output.contains("Swimming, Duration: 45 minutes, Day: Wednesday"));
+    }
 
-        // Test 4: Log more activities and calculate again
-        System.out.println("\nTest 4: Log more activities and recalculate");
-        tracker.logActivity("Tennis", 90, "Sunday");
-        tracker.logActivity("Basketball", 60, "Thursday");
-        tracker.calculateTotalTime();  // Updated total time with more activities
+    @Test
+    public void testCalculateTotalTime() {
+        tracker.logActivity("Running", 30, "Monday");
+        tracker.logActivity("Swimming", 45, "Wednesday");
 
-        // Test 5: View activities after adding more
-        System.out.println("\nTest 5: View activities after more entries");
-        tracker.viewActivities();  // Ensure that all activities are correctly displayed
+        tracker.calculateTotalTime();
+
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("Total time spent on sports this week: 1 hours and 15 minutes."));
+    }
+
+    @Test
+    public void testCalculateTotalTimeWithNoActivities() {
+        tracker.calculateTotalTime();
+
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("Total time spent on sports this week: 0 hours and 0 minutes."));
+    }
+
+    @Test
+    public void testLogMultipleActivitiesAndRecalculateTotalTime() {
+        tracker.logActivity("Tennis", 60, "Sunday");
+        tracker.logActivity("Cycling", 90, "Saturday");
+
+        tracker.calculateTotalTime();
+
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("Total time spent on sports this week: 2 hours and 30 minutes."));
     }
 }
